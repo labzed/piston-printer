@@ -7,14 +7,16 @@
   "repository": "labzed/piston-printer",
   "scripts": {
     "build": "rm -rf build && tsc",
-    "format": "prettier --write --single-quote --ignore-path .gitignore '**/*.ts'",
+    "format": "prettier --write --single-quote --ignore-path .gitignore '**/*.{ts,js}'",
     "test": "npm run build && jest --testEnvironment node"
   },
+  "files": [
+    "build"
+  ],
   "devDependencies": {
     "@types/jest": "^23.0.0",
     "axios": "^0.18.0",
     "jest": "^23.1.0",
-    "md5": "^2.2.1",
     "pdf-parse": "^1.0.8",
     "prettier": "^1.13.4",
     "ts-jest": "^22.4.6",
@@ -23,11 +25,9 @@
   "dependencies": {
     "@types/express": "^4.11.1",
     "@types/get-port": "^3.2.0",
-    "@types/md5": "^2.1.32",
     "@types/puppeteer": "^1.5.0",
     "@types/qs": "^6.5.1",
     "express": "^4.16.3",
-    "fs-extra": "^5.0.0",
     "get-port": "^3.2.0",
     "liquidjs": "^4.0.0",
     "puppeteer": "^1.4.0",

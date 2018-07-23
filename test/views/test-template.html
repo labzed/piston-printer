@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="/assets/margin.css"/>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Open Sans';
+    }
+
+    .container {
+      text-align: center;
+      margin: 1in 0;
+    }
+
+    .logo {
+      margin: 0.25in 0;
+    }
+
+    .title {
+      font-weight: 300;
+      font-size: 48pt;
+    }
+
+    .subtitle {
+      font-weight: 700;
+      font-size: 18pt;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="title">Hello, {{name}}.</div>
+    <div class="logo">{% include 'logo.html' %}</div>
+    <div class="subtitle">Piston Press</div>
+  </div>
+</body>
+
+</html>
