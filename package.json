@@ -2,10 +2,12 @@
   "name": "piston-printer",
   "license": "MIT",
   "main": "build/index.js",
+  "version": "0.0.1",
   "types": "build/index.d.ts",
+  "repository": "labzed/piston-printer",
   "scripts": {
     "build": "rm -rf build && tsc",
-    "format": "prettier --write --single-quote '**/*.ts'",
+    "format": "prettier --write --single-quote --ignore-path .gitignore '**/*.ts'",
     "test": "npm run build && jest --testEnvironment node"
   },
   "devDependencies": {
