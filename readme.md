@@ -1,15 +1,17 @@
-<div style="text-align:center;"><img style="width:120px" src="piston.svg"></div>
-<h1 style="text-align: center">Piston Printer</h1>
+<div align="center">
+<img src="piston.svg" width="100"/>
+<h1>Piston Printer</h1>
+</div>
 
 Piston Printer is a node.js module for printing HTML templates to PDF.
 
 It uses:
 
-- A headless Chromium process to render the HTML and print to a PDF
-- [Puppeteer](https://github.com/GoogleChrome/puppeteer) to control the Chromium process
+- A headless Chromium process to render HTML templates and print to PDF
+- The [Puppeteer](https://github.com/GoogleChrome/puppeteer) library to automate the Chromium process
 - A localhost-facing instance of Express to render the HTML based on templates
 
-Express is used to render templates placed in the template directory and to provide access to local assets (stylesheets, images, etc) placed in an assets directory.
+Express is used to render HTML templates and to provide access to local assets like stylesheets, images, and fonts.
 
 This makes it easy to use any template engine supported by Express, including template features like layouts/partials, and at the same time serve static files by just placing them in the assets directory.
 
