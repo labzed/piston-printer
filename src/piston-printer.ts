@@ -1,6 +1,7 @@
 import * as puppeteer from 'puppeteer';
 import * as qs from 'qs';
 import { URL } from 'url';
+import * as path from 'path';
 
 interface IConstructorOptions {
   browser: puppeteer.Browser;
@@ -80,8 +81,9 @@ export class PistonPrinter implements IPistonPrinter {
         }, 0);
       }
       page.on('response', response => {
+        const parsedUrl = new URL(response.url());
         console.log(
-          `puppeteer response: ${response.status()} ${response.url()}`
+          `puppeteer response: ${response.status()} ${path.basename(parsedUrl.pathname)}`
         );
         if (response.status() >= 400) {
           let url = response.url();
