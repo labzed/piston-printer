@@ -45,7 +45,6 @@ interface IPistonPrinter {
 Example directory structure:
 
 - `assets/`
-  ``
 - `templates/`
   - `my-template.html`
 
