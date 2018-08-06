@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rm -rf build && tsc",
     "format": "prettier --write --single-quote --ignore-path .gitignore '**/*.{ts,js}'",
-    "test": "npm run build && jest --testEnvironment node",
+    "test": "npm run lint && npm run build && jest --testEnvironment node",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json --format stylish"
   },
   "files": [
