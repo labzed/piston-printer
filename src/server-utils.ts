@@ -1,4 +1,7 @@
+import * as debugFactory from 'debug';
 import * as express from 'express';
+
+const debug = debugFactory('piston-printer');
 
 const localAddresses = ['127.0.0.1', '::ffff:127.0.0.1', '::1'];
 
@@ -16,7 +19,7 @@ export function denyRemoteConnections(
     next();
     return;
   }
-  console.error(`Restricted local connection: ${req.connection.remoteAddress}`);
+  debug(`Restricted local connection: ${req.connection.remoteAddress}`);
   res
     .type('text')
     .status(401)

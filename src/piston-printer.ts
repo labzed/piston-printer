@@ -1,7 +1,10 @@
+import * as debugFactory from 'debug';
+import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 import * as qs from 'qs';
 import { URL } from 'url';
-import * as path from 'path';
+
+const debug = debugFactory('piston-printer');
 
 interface IConstructorOptions {
   browser: puppeteer.Browser;
@@ -53,43 +56,40 @@ export class PistonPrinter implements IPistonPrinter {
     this.allowFailedRequests = false;
   }
 
-  async printTemplate(
+  public async printTemplate(
     templateName: string,
     values: ITemplateValues = {},
     options: Partial<IPrintOptions> = {}
   ): Promise<{ pdf: Buffer }> {
-    console.log('renderTemplate', templateName);
+    debug(`renderTemplate ${templateName}`);
     const serializedValues = JSON.stringify(values);
     const queryString = qs.stringify({
-      templateName: templateName,
+      templateName,
       values: serializedValues
     });
     const url = `http://127.0.0.1:${this.port}/render?${queryString}`;
     const t = timer();
 
     const page = await this.browser.newPage();
-    console.log('Page opened', t.mark());
+    debug(`Page opened ${t.mark()}`);
     let aborted = false;
 
     const pageErrorPromise = new Promise((resolve, reject) => {
-      async function abort(error: Error) {
+      function abort(error: Error) {
         setTimeout(async () => {
-          console.log(`(${aborted}) abort(${error.message}`);
+          debug(`(${aborted}) abort(${error.message}`);
           aborted = true;
           reject(error);
-          console.log('-- done rejecting --');
         }, 0);
       }
       page.on('response', response => {
         const parsedUrl = new URL(response.url());
-        console.log(
-          `puppeteer response: ${response.status()} ${path.basename(parsedUrl.pathname)}`
-        );
+        const name = path.basename(parsedUrl.pathname);
+        debug(`puppeteer response: ${response.status()} ${name}`);
         if (response.status() >= 400) {
-          let url = response.url();
-          const parsedUrl = new URL(url);
+          let errorUrl = url;
           if (parsedUrl.hostname === '127.0.0.1') {
-            url = parsedUrl.pathname;
+            errorUrl = parsedUrl.pathname;
           }
           const neptuneMessage = response.headers()['x-neptune-error'];
           if (neptuneMessage) {
@@ -97,25 +97,25 @@ export class PistonPrinter implements IPistonPrinter {
               new Error(`Render router failed with message: ${neptuneMessage}`)
             );
           } else if (!this.allowFailedRequests) {
-            abort(new Error(`Failed to load template resource: ${url}`));
+            abort(new Error(`Failed to load template resource: ${errorUrl}`));
           }
         }
       });
 
       page.on('pageerror', errorMessage => {
-        console.error('puppeteer pageerror:', errorMessage);
+        debug(`puppeteer pageerror: ${errorMessage}`);
         const error = new Error(errorMessage);
         error.name = 'PageError';
         abort(error);
       });
 
       page.on('error', error => {
-        console.error('ACTUAL page:error', error);
+        debug(`puppeteer error: ${error}`);
         abort(error);
       });
 
       page.on('console', message => {
-        console.log('--->', message.text());
+        debug(`puppeteer console.${message.type}: ${message.text()}`);
       });
     });
 
@@ -123,12 +123,8 @@ export class PistonPrinter implements IPistonPrinter {
       .goto(url, { waitUntil: 'networkidle0' })
       .then(result => {
         // TODO remove this handler
-        console.log('page goto load event fired', t.mark());
+        debug(`page goto load event fired ${t.mark()}`);
         return result;
-      })
-      .catch(err => {
-        console.log('FYI pageGotoPromise rejected', err);
-        throw err;
       });
 
     try {
@@ -139,19 +135,19 @@ export class PistonPrinter implements IPistonPrinter {
         );
       }
       await page.screenshot();
-      console.log('screenshot taken', t.mark());
+      debug(`screenshot taken ${t.mark()}`);
       const result = { pdf: await page.pdf(options) };
-      console.log('pdf generated', t.mark());
+      debug(`pdf generated ${t.mark()}`);
       return result;
     } catch (error) {
       throw error;
     } finally {
       await page.close();
-      console.log('page closed', t.mark());
+      debug(`page closed ${t.mark()}`);
     }
   }
 
-  close() {
+  public close() {
     return Promise.all([this.browser.close(), this.server.stop()]);
   }
 }

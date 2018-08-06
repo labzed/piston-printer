@@ -1,7 +1,7 @@
-import { PistonPrinter } from './piston-printer';
-import { MyServer } from './create-server';
 import * as getPort from 'get-port';
 import * as puppeteer from 'puppeteer';
+import { MyServer } from './create-server';
+import { PistonPrinter } from './piston-printer';
 
 export async function initializePrinter(options: IServerOptions) {
   if (!options.assetsDirectory) {

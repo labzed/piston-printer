@@ -1,10 +1,12 @@
-import * as Liquid from 'liquidjs';
+import * as debugFactory from 'debug';
 import * as express from 'express';
 import * as http from 'http';
+import * as Liquid from 'liquidjs';
 import * as path from 'path';
 import { denyRemoteConnections, fileNotFoundErrorTo404 } from './server-utils';
+const debug = debugFactory('piston-printer');
 
-export function createServer(options: IServerOptions) {
+export function createServer(options: IServerOptions): express.Express {
   const liquidEngine = Liquid();
   const app = express();
 
@@ -32,7 +34,7 @@ export function createServer(options: IServerOptions) {
       return;
     }
 
-    let values = {};
+    let values: { [key: string]: any } = {};
     const serializedValues: string | undefined = req.query.values;
     if (serializedValues) {
       try {
@@ -61,7 +63,7 @@ export function createServer(options: IServerOptions) {
       next: express.NextFunction
     ) => {
       res.set('x-neptune-error', error.message);
-      console.error(`[sending 500] ${error.message}`);
+      debug(`[sending 500] ${error.message}`);
 
       res
         .status(500)
@@ -69,7 +71,6 @@ export function createServer(options: IServerOptions) {
         .send();
     }
   );
-
   return app;
 }
 
@@ -80,14 +81,14 @@ export class MyServer {
     this.app = createServer(options);
   }
 
-  start(port: number | string) {
+  public start(port: number | string) {
     return new Promise((resolve, reject) => {
       this.httpServer = this.app.listen(port, resolve);
       this.app.on('error', reject);
     });
   }
 
-  stop() {
+  public stop() {
     if (this.httpServer) {
       this.httpServer.close();
     }

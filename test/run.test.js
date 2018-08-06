@@ -3,8 +3,6 @@ const pdfParse = require('pdf-parse');
 const path = require('path');
 const fs = require('fs-extra');
 
-console.log('begginging to jest');
-
 let press;
 beforeAll(async done => {
   press = await PistonPress.initializePrinter({
