@@ -61,7 +61,8 @@ export class PistonPrinter implements IPistonPrinter {
     values: ITemplateValues = {},
     options: Partial<IPrintOptions> = {}
   ): Promise<{ pdf: Buffer }> {
-    debug(`renderTemplate ${templateName}`);
+    const browserVersion = await this.browser.version();
+    debug(`renderTemplate ${templateName} (${browserVersion})`);
     const serializedValues = JSON.stringify(values);
     const queryString = qs.stringify({
       templateName,
