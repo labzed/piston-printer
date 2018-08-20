@@ -2,8 +2,8 @@ import * as debugFactory from 'debug';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 import * as qs from 'qs';
-import { Timer } from './timer';
 import { URL } from 'url';
+import { Timer } from './timer';
 
 const debug = debugFactory('piston-printer');
 
