@@ -12,8 +12,8 @@ export class Timer {
     const result = {
       section: now - this.lastTime,
       total: now - this.startTime
-    }
+    };
     this.lastTime = now;
-    return `${result.section}(${result.total})ms`
+    return `${result.section}(${result.total})ms`;
   }
 }

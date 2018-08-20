@@ -2,7 +2,7 @@ import * as debugFactory from 'debug';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 import * as qs from 'qs';
-import {Timer} from './timer';
+import { Timer } from './timer';
 import { URL } from 'url';
 
 const debug = debugFactory('piston-printer');
@@ -33,7 +33,7 @@ interface IPdfOptions {
 }
 
 interface IPrinterOptions {
-  waitUntilEvent: 'networkidle0' | 'networkidle2' | 'load'
+  waitUntilEvent: 'networkidle0' | 'networkidle2' | 'load';
 }
 
 interface IPistonPrinter {
@@ -65,7 +65,9 @@ export class PistonPrinter implements IPistonPrinter {
     templateName: string,
     values: ITemplateValues = {},
     options: Partial<IPdfOptions> = {},
-    printerOptions: Partial<IPrinterOptions> = {waitUntilEvent: 'networkidle0'}
+    printerOptions: Partial<IPrinterOptions> = {
+      waitUntilEvent: 'networkidle0'
+    }
   ): Promise<{ pdf: Buffer }> {
     const browserVersion = await this.browser.version();
     debug(`renderTemplate ${templateName} (${browserVersion})`);
@@ -135,17 +137,20 @@ export class PistonPrinter implements IPistonPrinter {
       });
     });
 
-
-    const pageNavigationPromise = page.goto(url, {waitUntil: printerOptions.waitUntilEvent})
-        .then(result => {
-          // TODO remove this handler
-          debug(`page goto load event fired ${t.mark()}`);
-          return result;
-        });
-
+    const pageNavigationPromise = page
+      .goto(url, { waitUntil: printerOptions.waitUntilEvent })
+      .then(result => {
+        // TODO remove this handler
+        debug(`page goto load event fired ${t.mark()}`);
+        return result;
+      });
 
     try {
-      await Promise.race([pageReadyCallPromise, pageNavigationPromise, pageErrorPromise]);
+      await Promise.race([
+        pageReadyCallPromise,
+        pageNavigationPromise,
+        pageErrorPromise
+      ]);
       if (aborted) {
         throw new Error(
           `goto promise resolved but aborted=true already, so will not call page.pdf()`
