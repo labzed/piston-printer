@@ -2,6 +2,7 @@ import * as debugFactory from 'debug';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 import * as qs from 'qs';
+import {Timer} from './timer';
 import { URL } from 'url';
 
 const debug = debugFactory('piston-printer');
@@ -20,7 +21,7 @@ interface IStoppable {
   stop(): void;
 }
 
-interface IPrintOptions {
+interface IPdfOptions {
   width: string;
   height: string;
   margin: {
@@ -31,11 +32,15 @@ interface IPrintOptions {
   };
 }
 
+interface IPrinterOptions {
+  waitUntilEvent: 'networkidle0' | 'networkidle2' | 'load'
+}
+
 interface IPistonPrinter {
   printTemplate(
     templateName: string,
     values?: ITemplateValues,
-    options?: Partial<IPrintOptions>
+    options?: Partial<IPdfOptions>
   ): Promise<{ pdf: Buffer }>;
 }
 
@@ -59,7 +64,8 @@ export class PistonPrinter implements IPistonPrinter {
   public async printTemplate(
     templateName: string,
     values: ITemplateValues = {},
-    options: Partial<IPrintOptions> = {}
+    options: Partial<IPdfOptions> = {},
+    printerOptions: Partial<IPrinterOptions> = {waitUntilEvent: 'networkidle0'}
   ): Promise<{ pdf: Buffer }> {
     const browserVersion = await this.browser.version();
     debug(`renderTemplate ${templateName} (${browserVersion})`);
@@ -69,11 +75,19 @@ export class PistonPrinter implements IPistonPrinter {
       values: serializedValues
     });
     const url = `http://127.0.0.1:${this.port}/render?${queryString}`;
-    const t = timer();
+    const t = new Timer();
 
     const page = await this.browser.newPage();
     debug(`Page opened ${t.mark()}`);
     let aborted = false;
+
+    const pageReadyCallPromise = new Promise((resolve, reject) => {
+      debug('exposing windows.ready()');
+      page.exposeFunction('ready', () => {
+        debug('window.ready() called');
+        resolve();
+      });
+    });
 
     const pageErrorPromise = new Promise((resolve, reject) => {
       function abort(error: Error) {
@@ -83,6 +97,7 @@ export class PistonPrinter implements IPistonPrinter {
           reject(error);
         }, 0);
       }
+
       page.on('response', response => {
         const parsedUrl = new URL(response.url());
         const name = path.basename(parsedUrl.pathname);
@@ -116,27 +131,28 @@ export class PistonPrinter implements IPistonPrinter {
       });
 
       page.on('console', message => {
-        debug(`puppeteer console.${message.type}: ${message.text()}`);
+        debug(`puppeteer console.${message.type()}: ${message.text()}`);
       });
     });
 
-    const pageGotoPromise = page
-      .goto(url, { waitUntil: 'networkidle0' })
-      .then(result => {
-        // TODO remove this handler
-        debug(`page goto load event fired ${t.mark()}`);
-        return result;
-      });
+
+    const pageNavigationPromise = page.goto(url, {waitUntil: printerOptions.waitUntilEvent})
+        .then(result => {
+          // TODO remove this handler
+          debug(`page goto load event fired ${t.mark()}`);
+          return result;
+        });
+
 
     try {
-      await Promise.race([pageGotoPromise, pageErrorPromise]);
+      await Promise.race([pageReadyCallPromise, pageNavigationPromise, pageErrorPromise]);
       if (aborted) {
         throw new Error(
           `goto promise resolved but aborted=true already, so will not call page.pdf()`
         );
       }
-      await page.screenshot();
-      debug(`screenshot taken ${t.mark()}`);
+      // await page.screenshot();
+      // debug(`screenshot taken ${t.mark()}`);
       const result = { pdf: await page.pdf(options) };
       debug(`pdf generated ${t.mark()}`);
       return result;
@@ -151,15 +167,4 @@ export class PistonPrinter implements IPistonPrinter {
   public close() {
     return Promise.all([this.browser.close(), this.server.stop()]);
   }
-}
-
-function timer() {
-  return {
-    t: +new Date(),
-    mark() {
-      const result = +new Date() - this.t;
-      this.t = +new Date();
-      return result;
-    }
-  };
 }
