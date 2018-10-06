@@ -1,16 +1,20 @@
+// import * as Liquid from 'liquidjs';
+// import * as Handlebars from 'handlebars';
+import * as consolidate from 'consolidate';
 import * as debugFactory from 'debug';
 import * as express from 'express';
 import * as http from 'http';
-import * as Liquid from 'liquidjs';
 import * as path from 'path';
 import { denyRemoteConnections, fileNotFoundErrorTo404 } from './server-utils';
+import { IServerOptions } from './types';
 const debug = debugFactory('piston-printer');
 
 export function createServer(options: IServerOptions): express.Express {
-  const liquidEngine = Liquid();
+  // const liquidEngine = Liquid();
   const app = express();
 
-  app.engine('html', liquidEngine.express());
+  app.engine('html', consolidate.nunjucks);
+  // app.engine('nj.html', consolidate.handlebars);
   app.set('views', path.resolve(options.templatesDirectory));
   app.set('view engine', 'html');
 

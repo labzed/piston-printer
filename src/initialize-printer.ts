@@ -2,6 +2,8 @@ import * as getPort from 'get-port';
 import * as puppeteer from 'puppeteer';
 import { MyServer } from './create-server';
 import { PistonPrinter } from './piston-printer';
+import QueuedPistonPrinter from './queued-piston-printer';
+import { IServerOptions } from './types';
 
 export async function initializePrinter(options: IServerOptions) {
   if (!options.assetsDirectory) {
@@ -20,5 +22,6 @@ export async function initializePrinter(options: IServerOptions) {
   const server = new MyServer(options);
 
   await server.start(port);
-  return new PistonPrinter({ port, browser, server });
+  const printer = new PistonPrinter({ port, browser, server });
+  return new QueuedPistonPrinter(printer);
 }

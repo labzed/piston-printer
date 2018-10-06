@@ -2,47 +2,19 @@ import * as debugFactory from 'debug';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 import * as qs from 'qs';
+import {
+  IConstructorOptions,
+  IPdfOptions,
+  IPistonPrinter,
+  IPrinterOptions,
+  IStoppable,
+  ITemplateValues
+} from './types';
+
 import { URL } from 'url';
 import { Timer } from './timer';
 
 const debug = debugFactory('piston-printer');
-
-interface IConstructorOptions {
-  browser: puppeteer.Browser;
-  port: string | number;
-  server: IStoppable;
-}
-
-interface ITemplateValues {
-  [key: string]: any;
-}
-
-interface IStoppable {
-  stop(): void;
-}
-
-interface IPdfOptions {
-  width: string;
-  height: string;
-  margin: {
-    top: string;
-    bottom: string;
-    left: string;
-    right: string;
-  };
-}
-
-interface IPrinterOptions {
-  waitUntilEvent: 'networkidle0' | 'networkidle2' | 'load';
-}
-
-interface IPistonPrinter {
-  printTemplate(
-    templateName: string,
-    values?: ITemplateValues,
-    options?: Partial<IPdfOptions>
-  ): Promise<{ pdf: Buffer }>;
-}
 
 export class PistonPrinter implements IPistonPrinter {
   private browser: puppeteer.Browser;
@@ -120,10 +92,10 @@ export class PistonPrinter implements IPistonPrinter {
         }
       });
 
-      page.on('pageerror', errorMessage => {
-        debug(`puppeteer pageerror: ${errorMessage}`);
-        const error = new Error(errorMessage);
-        error.name = 'PageError';
+      page.on('pageerror', error => {
+        debug(`puppeteer pageerror: ${error.name}: ${error.message}`);
+        // const error = new Error(errorMessage);
+        // error.name = 'PageError';
         abort(error);
       });
 
