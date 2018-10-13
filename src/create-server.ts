@@ -1,31 +1,38 @@
-// import * as Liquid from 'liquidjs';
-// import * as Handlebars from 'handlebars';
-import * as consolidate from 'consolidate';
 import * as debugFactory from 'debug';
 import * as express from 'express';
+import * as expressHandlebars from 'express-handlebars';
 import * as http from 'http';
 import * as path from 'path';
-import { denyRemoteConnections, fileNotFoundErrorTo404 } from './server-utils';
+import {
+  denyRemoteConnections,
+  handle404,
+  handleStatic404
+} from './server-utils';
 import { IServerOptions } from './types';
 const debug = debugFactory('piston-printer');
 
 export function createServer(options: IServerOptions): express.Express {
-  // const liquidEngine = Liquid();
   const app = express();
 
-  app.engine('html', consolidate.nunjucks);
-  // app.engine('nj.html', consolidate.handlebars);
-  app.set('views', path.resolve(options.templatesDirectory));
-  app.set('view engine', 'html');
+  // Templating engine
+  const templateExtension = 'hbs';
+  const fullTemplatesDirectory = path.resolve(options.templatesDirectory);
+  const templateEngine = expressHandlebars({
+    extname: templateExtension,
+    partialsDir: fullTemplatesDirectory
+  });
+  app.engine(templateExtension, templateEngine);
+  app.set('views', fullTemplatesDirectory);
+  app.set('view engine', templateExtension);
 
   app.use(denyRemoteConnections);
 
   app.use(
     '/assets',
     express.static(path.resolve(options.assetsDirectory), {
-      fallthrough: false
+      fallthrough: true
     }),
-    fileNotFoundErrorTo404
+    handleStatic404
   );
 
   app.get('/render/', (req, res, next) => {
@@ -52,12 +59,7 @@ export function createServer(options: IServerOptions): express.Express {
     res.render(templateName, values);
   });
 
-  app.use((req, res, next) => {
-    res
-      .type('text')
-      .status(400)
-      .send();
-  });
+  app.use(handle404);
 
   app.use(
     (
@@ -66,7 +68,7 @@ export function createServer(options: IServerOptions): express.Express {
       res: express.Response,
       next: express.NextFunction
     ) => {
-      res.set('x-neptune-error', error.message);
+      res.set('x-piston-printer-error', error.message);
       debug(`[sending 500] ${error.message}`);
 
       res

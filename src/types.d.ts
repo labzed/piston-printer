@@ -9,7 +9,6 @@ interface IConstructorOptions {
   browser: puppeteer.Browser;
   port: string | number;
   server: IStoppable;
-  allowFailedRequests: boolean;
 }
 
 interface ITemplateValues {
@@ -33,6 +32,7 @@ interface IPdfOptions {
 
 interface IPrinterOptions {
   waitUntilEvent: 'networkidle0' | 'networkidle2' | 'load';
+  allowFailedRequests: boolean;
 }
 
 interface IPistonPrinter {

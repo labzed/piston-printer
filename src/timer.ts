@@ -1,8 +1,12 @@
 export class Timer {
   private startTime: number;
   private lastTime: number;
+  private id: string;
 
   constructor() {
+    this.id = Math.random()
+      .toString()
+      .slice(2, 6);
     this.startTime = +new Date();
     this.lastTime = this.startTime;
   }
@@ -14,6 +18,6 @@ export class Timer {
       total: now - this.startTime
     };
     this.lastTime = now;
-    return `${result.section}(${result.total})ms`;
+    return `[${this.id}]${result.section}(${result.total})ms`;
   }
 }

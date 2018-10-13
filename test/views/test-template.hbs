@@ -2,8 +2,8 @@
 <html>
 
 <head>
-  <link rel="stylesheet" href="/assets/margin.css"/>
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet"/>
+  {{> stylesheet url="/assets/margin.css" }}
+  {{> stylesheet url="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" }}
   <style>
     body {
       font-family: 'Open Sans';
@@ -32,8 +32,8 @@
 
 <body>
   <div class="container">
-    <div class="title">Hello, {{name}}.</div>
-    <div class="logo">{% include 'logo.html' %}</div>
+    <div class="title">Hello, {{ name }}.</div>
+    <div class="logo">{{> logo size=2 }}</div>
     <div class="subtitle">Piston Press</div>
   </div>
 </body>

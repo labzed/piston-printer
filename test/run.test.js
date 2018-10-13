@@ -1,11 +1,11 @@
-const PistonPress = require('../build');
+const { initializePrinter } = require('../build');
 const pdfParse = require('pdf-parse');
 const path = require('path');
 const fs = require('fs-extra');
 
-let press;
+let printer;
 beforeAll(async done => {
-  press = await PistonPress.initializePrinter({
+  printer = await initializePrinter({
     templatesDirectory: path.join(__dirname, '/views'),
     assetsDirectory: path.join(__dirname, '/assets')
   });
@@ -14,7 +14,7 @@ beforeAll(async done => {
 });
 
 test('test printing press', async () => {
-  const { pdf } = await press.printTemplate('test-template.html', {
+  const { pdf } = await printer.printTemplate('test-template', {
     name: 'world'
   });
 
@@ -28,10 +28,39 @@ test('test printing press', async () => {
   // TODO: This test doesn't check actual rendering (e.g. fonts and image)
   expect(pdfData.text).toBe(' Hello, world. Piston Press \n\n');
 
-  // await fs.writeFile('./snapshot.pdf', pdf);
+  await fs.writeFile('./snapshot.pdf', pdf);
+});
+
+test('test printer with missing asset without allowFailedRequests', async () => {
+  expect.assertions(1);
+
+  try {
+    await printer.printTemplate('test-template-missing-image');
+  } catch (error) {
+    expect(error).toEqual({
+      name: 'AssetNotFound',
+      message: '/assets/missing-image.png'
+    });
+  }
+});
+
+test('test printer with missing asset and allowFailedRequests', async () => {
+  expect.assertions(1);
+
+  const { pdf } = await printer.printTemplate(
+    'test-template-missing-image',
+    undefined,
+    undefined,
+    {
+      allowFailedRequests: true
+    }
+  );
+
+  expect(pdf).toBeInstanceOf(Buffer);
 });
 
 afterAll(async done => {
-  await press.close();
+  console.log('JEST DECIDED WE ARE ALL DONE');
+  await printer.close();
   done();
 });

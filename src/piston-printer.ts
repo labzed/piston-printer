@@ -19,8 +19,8 @@ const debug = debugFactory('piston-printer');
 export class PistonPrinter implements IPistonPrinter {
   private browser: puppeteer.Browser;
   private port: string;
-  private allowFailedRequests: boolean;
   private server: IStoppable;
+  private closed: boolean;
 
   /**
    * @param options.port Local port number
@@ -30,7 +30,7 @@ export class PistonPrinter implements IPistonPrinter {
     this.browser = options.browser;
     this.port = String(options.port);
     this.server = options.server;
-    this.allowFailedRequests = !!options.allowFailedRequests;
+    this.closed = false;
   }
 
   public async printTemplate(
@@ -41,15 +41,21 @@ export class PistonPrinter implements IPistonPrinter {
       waitUntilEvent: 'networkidle0'
     }
   ): Promise<{ pdf: Buffer }> {
+    const t = new Timer();
+
+    if (this.closed) {
+      throw new Error(
+        'Called printTemplate() after printer was already shut down with close()'
+      );
+    }
     const browserVersion = await this.browser.version();
-    debug(`renderTemplate ${templateName} (${browserVersion})`);
+    debug(`renderTemplate ${templateName} (${browserVersion}) ${t.mark()}`);
     const serializedValues = JSON.stringify(values);
     const queryString = qs.stringify({
       templateName,
       values: serializedValues
     });
     const url = `http://127.0.0.1:${this.port}/render?${queryString}`;
-    const t = new Timer();
 
     const page = await this.browser.newPage();
     debug(`Page opened ${t.mark()}`);
@@ -66,7 +72,7 @@ export class PistonPrinter implements IPistonPrinter {
     const pageErrorPromise = new Promise((resolve, reject) => {
       function abort(error: Error) {
         setTimeout(async () => {
-          debug(`(${aborted}) abort(${error.message}`);
+          debug(`abort(${error.name}: ${error.message}) (aborted=${aborted})`);
           aborted = true;
           reject(error);
         }, 0);
@@ -81,13 +87,22 @@ export class PistonPrinter implements IPistonPrinter {
           if (parsedUrl.hostname === '127.0.0.1') {
             errorUrl = parsedUrl.pathname;
           }
-          const neptuneMessage = response.headers()['x-neptune-error'];
-          if (neptuneMessage) {
-            abort(
-              new Error(`Render router failed with message: ${neptuneMessage}`)
-            );
-          } else if (!this.allowFailedRequests) {
-            abort(new Error(`Failed to load template resource: ${errorUrl}`));
+          const headers = response.headers();
+          const neptuneErrorName = headers['x-piston-printer-error'];
+          if (neptuneErrorName) {
+            if (
+              neptuneErrorName === 'AssetNotFound' &&
+              printerOptions.allowFailedRequests
+            ) {
+              return;
+            }
+            abort({
+              message: errorUrl,
+              name: neptuneErrorName
+            } as Error);
+            // const error = new Error(errorUrl);
+            // error.name = neptuneErrorName;
+            // abort(error)
           }
         }
       });
@@ -124,9 +139,7 @@ export class PistonPrinter implements IPistonPrinter {
         pageErrorPromise
       ]);
       if (aborted) {
-        throw new Error(
-          `piston-printer already aborted`
-        );
+        throw new Error(`piston-printer already aborted`);
       }
       // await page.screenshot();
       // debug(`screenshot taken ${t.mark()}`);
@@ -142,6 +155,8 @@ export class PistonPrinter implements IPistonPrinter {
   }
 
   public close() {
+    debug('close(): shutting down piston-printer');
+    this.closed = true;
     return Promise.all([this.browser.close(), this.server.stop()]);
   }
 }

@@ -26,18 +26,25 @@ export function denyRemoteConnections(
     .send('Restricted to local connections only');
 }
 
-export function fileNotFoundErrorTo404(
-  err: any,
+export function handleStatic404(
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) {
-  if (err.code === 'ENOENT') {
-    res
-      .type('text')
-      .status(404)
-      .send();
-    return;
-  }
-  throw err;
+  res
+    .status(404)
+    .type('text')
+    .set('x-piston-printer-error', 'AssetNotFound')
+    .send();
+}
+
+export function handle404(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+  res
+    .type('text')
+    .status(404)
+    .send();
 }
