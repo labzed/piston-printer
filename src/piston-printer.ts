@@ -30,7 +30,7 @@ export class PistonPrinter implements IPistonPrinter {
     this.browser = options.browser;
     this.port = String(options.port);
     this.server = options.server;
-    this.allowFailedRequests = false;
+    this.allowFailedRequests = !!options.allowFailedRequests;
   }
 
   public async printTemplate(
@@ -125,7 +125,7 @@ export class PistonPrinter implements IPistonPrinter {
       ]);
       if (aborted) {
         throw new Error(
-          `goto promise resolved but aborted=true already, so will not call page.pdf()`
+          `piston-printer already aborted`
         );
       }
       // await page.screenshot();

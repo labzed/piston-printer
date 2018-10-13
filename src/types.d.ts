@@ -9,6 +9,7 @@ interface IConstructorOptions {
   browser: puppeteer.Browser;
   port: string | number;
   server: IStoppable;
+  allowFailedRequests: boolean;
 }
 
 interface ITemplateValues {
