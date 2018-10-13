@@ -1,8 +1,8 @@
 import * as getPort from 'get-port';
 import * as puppeteer from 'puppeteer';
-import { MyServer } from './create-server';
 import { PistonPrinter } from './piston-printer';
 import QueuedPistonPrinter from './queued-piston-printer';
+import ServerRunner from './server-runner';
 import { IServerOptions } from './types';
 
 export async function initializePrinter(options: IServerOptions) {
@@ -19,7 +19,7 @@ export async function initializePrinter(options: IServerOptions) {
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
-  const server = new MyServer(options);
+  const server = new ServerRunner(options);
 
   await server.start(port);
   const printer = new PistonPrinter({ port, browser, server });

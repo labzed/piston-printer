@@ -100,9 +100,6 @@ export class PistonPrinter implements IPistonPrinter {
               message: errorUrl,
               name: neptuneErrorName
             } as Error);
-            // const error = new Error(errorUrl);
-            // error.name = neptuneErrorName;
-            // abort(error)
           }
         }
       });

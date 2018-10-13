@@ -1,7 +1,6 @@
 import * as debugFactory from 'debug';
 import * as express from 'express';
 import * as expressHandlebars from 'express-handlebars';
-import * as http from 'http';
 import * as path from 'path';
 import {
   denyRemoteConnections,
@@ -11,7 +10,7 @@ import {
 import { IServerOptions } from './types';
 const debug = debugFactory('piston-printer');
 
-export function createServer(options: IServerOptions): express.Express {
+export default function createServer(options: IServerOptions): express.Express {
   const app = express();
 
   // Templating engine
@@ -78,25 +77,4 @@ export function createServer(options: IServerOptions): express.Express {
     }
   );
   return app;
-}
-
-export class MyServer {
-  private app: express.Application;
-  private httpServer?: http.Server;
-  constructor(options: IServerOptions) {
-    this.app = createServer(options);
-  }
-
-  public start(port: number | string) {
-    return new Promise((resolve, reject) => {
-      this.httpServer = this.app.listen(port, resolve);
-      this.app.on('error', reject);
-    });
-  }
-
-  public stop() {
-    if (this.httpServer) {
-      this.httpServer.close();
-    }
-  }
 }
