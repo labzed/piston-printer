@@ -20,8 +20,6 @@ test('test printing press', async () => {
 
   const pdfData = await pdfParse(pdf);
 
-  console.log(pdfData);
-
   expect(pdfData.numpages).toBe(1);
   expect(pdfData.info.Creator).toBe('Chromium');
 
@@ -60,7 +58,6 @@ test('test printer with missing asset and allowFailedRequests', async () => {
 });
 
 afterAll(async done => {
-  console.log('JEST DECIDED WE ARE ALL DONE');
   await printer.close();
   done();
 });
