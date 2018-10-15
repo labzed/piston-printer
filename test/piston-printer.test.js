@@ -14,7 +14,7 @@ beforeAll(async done => {
   done();
 });
 
-test('test printing press', async () => {
+test('printTemplate', async () => {
   const { pdf } = await printer.printTemplate('test-template', {
     name: 'world'
   });
@@ -30,7 +30,7 @@ test('test printing press', async () => {
   await fs.writeFile('./snapshot.pdf', pdf);
 });
 
-test('test printer with missing asset without allowFailedRequests', async () => {
+test('printTemplate with missing asset without allowFailedRequests', async () => {
   expect.assertions(1);
 
   try {
@@ -43,7 +43,7 @@ test('test printer with missing asset without allowFailedRequests', async () => 
   }
 });
 
-test('test printer with missing asset and allowFailedRequests', async () => {
+test('printTemplate with missing asset and allowFailedRequests', async () => {
   expect.assertions(1);
 
   const { pdf } = await printer.printTemplate(
