@@ -7,7 +7,8 @@ let printer;
 beforeAll(async done => {
   printer = await initializePrinter({
     templatesDirectory: path.join(__dirname, '/views'),
-    assetsDirectory: path.join(__dirname, '/assets')
+    assetsDirectory: path.join(__dirname, '/assets'),
+    templateExtension: 'hbs'
   });
 
   done();

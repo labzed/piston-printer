@@ -1,8 +1,11 @@
 import * as puppeteer from 'puppeteer';
+import * as consolidate from 'consolidate';
 
 export interface IServerOptions {
   templatesDirectory: string;
   assetsDirectory: string;
+  templateEngine?: Exclude<keyof typeof consolidate, 'requires'>;
+  templateExtension?: string;
 }
 
 interface IConstructorOptions {

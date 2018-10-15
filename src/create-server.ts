@@ -14,7 +14,7 @@ export default function createServer(options: IServerOptions): express.Express {
   const app = express();
 
   // Templating engine
-  const templateExtension = 'hbs';
+  const templateExtension = options.templateExtension || 'html';
   const fullTemplatesDirectory = path.resolve(options.templatesDirectory);
   const templateEngine = expressHandlebars({
     extname: templateExtension,

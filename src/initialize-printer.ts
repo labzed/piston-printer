@@ -6,12 +6,16 @@ import ServerRunner from './server-runner';
 import { IServerOptions } from './types';
 
 export async function initializePrinter(options: IServerOptions) {
+  if (!options) {
+    throw new Error('Missing options for intializePrinter');
+  }
+
   if (!options.assetsDirectory) {
-    throw new Error('Missing option: assetsDirectory');
+    throw new Error('Missing option for initializePrinter: assetsDirectory');
   }
 
   if (!options.templatesDirectory) {
-    throw new Error('Missing option: templatesDirectory');
+    throw new Error('Missing option for initializePrinter: templatesDirectory');
   }
 
   const port = await getPort();
