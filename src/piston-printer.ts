@@ -106,8 +106,6 @@ export class PistonPrinter implements IPistonPrinter {
 
       page.on('pageerror', error => {
         debug(`puppeteer pageerror: ${error.name}: ${error.message}`);
-        // const error = new Error(errorMessage);
-        // error.name = 'PageError';
         abort(error);
       });
 
@@ -124,7 +122,6 @@ export class PistonPrinter implements IPistonPrinter {
     const pageNavigationPromise = page
       .goto(url, { waitUntil: printerOptions.waitUntilEvent })
       .then(result => {
-        // TODO remove this handler
         debug(`page goto load event fired ${t.mark()}`);
         return result;
       });
@@ -138,6 +135,8 @@ export class PistonPrinter implements IPistonPrinter {
       if (aborted) {
         throw new Error(`piston-printer already aborted`);
       }
+      // The screenshot workaround can fix an issue with web fonts
+      // not rendering properly when using the "load" event.
       // await page.screenshot();
       // debug(`screenshot taken ${t.mark()}`);
       const result = { pdf: await page.pdf(options) };
