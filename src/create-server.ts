@@ -67,13 +67,12 @@ export default function createServer(options: IServerOptions): express.Express {
       res: express.Response,
       next: express.NextFunction
     ) => {
-      res.set('x-piston-printer-error', error.message);
       debug(`[sending 500] ${error.message}`);
 
       res
         .status(500)
         .type('text')
-        .send();
+        .send(`${error.name}: ${error.message}`);
     }
   );
   return app;

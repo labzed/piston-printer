@@ -88,17 +88,18 @@ export class PistonPrinter implements IPistonPrinter {
             errorUrl = parsedUrl.pathname;
           }
           const headers = response.headers();
-          const neptuneErrorName = headers['x-piston-printer-error'];
-          if (neptuneErrorName) {
+          const pistonPrinterErrorName = headers['x-piston-printer-error'];
+
+          if (pistonPrinterErrorName) {
             if (
-              neptuneErrorName === 'AssetNotFound' &&
+              pistonPrinterErrorName === 'AssetNotFound' &&
               printerOptions.allowFailedRequests
             ) {
               return;
             }
             abort({
               message: errorUrl,
-              name: neptuneErrorName
+              name: pistonPrinterErrorName
             } as Error);
           }
         }
