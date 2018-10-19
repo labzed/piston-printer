@@ -27,7 +27,7 @@ test('printTemplate', async done => {
   // TODO: This test doesn't check actual rendering (e.g. fonts and image)
   expect(pdfData.text).toBe(' Hello, world. Piston Press \n\n');
 
-  await fs.writeFile('./snapshot.pdf', pdf);
+  // await fs.writeFile('./snapshot.pdf', pdf);
 
   done();
 });
