@@ -14,7 +14,7 @@ beforeAll(async done => {
   done();
 });
 
-test('printTemplate', async () => {
+test('printTemplate', async done => {
   const { pdf } = await printer.printTemplate('test-template', {
     name: 'world'
   });
@@ -28,9 +28,11 @@ test('printTemplate', async () => {
   expect(pdfData.text).toBe(' Hello, world. Piston Press \n\n');
 
   await fs.writeFile('./snapshot.pdf', pdf);
+
+  done();
 });
 
-test('printTemplate with missing asset without allowFailedRequests', async () => {
+test('printTemplate with missing asset without allowFailedRequests', async done => {
   expect.assertions(1);
 
   try {
@@ -40,10 +42,11 @@ test('printTemplate with missing asset without allowFailedRequests', async () =>
       name: 'AssetNotFound',
       message: '/assets/missing-image.png'
     });
+    done();
   }
 });
 
-test('printTemplate with missing asset and allowFailedRequests', async () => {
+test('printTemplate with missing asset and allowFailedRequests', async done => {
   expect.assertions(1);
 
   const { pdf } = await printer.printTemplate(
@@ -56,6 +59,8 @@ test('printTemplate with missing asset and allowFailedRequests', async () => {
   );
 
   expect(pdf).toBeInstanceOf(Buffer);
+
+  done();
 });
 
 afterAll(async done => {
